@@ -3,6 +3,7 @@ import shutil
 import os
 from glob import glob
 from random import shuffle
+from os.path import exists
 
 TRAINING_IMAGES = 2000
 VAL_IMAGES = 400
@@ -12,13 +13,13 @@ TESTING_IMAGES = 400
 
 CLASS_NAMES = ['person', 'crutches', 'walking_frame', 'wheelchair', 'push_wheelchair']
 
-DATA_DIR = "C:\\Users\\davet\\OneDrive\\Desktop\\fmad\\fmad_orig"
+DATA_DIR = "C:\\Users\\angel\\Desktop\\fmad\\fmad_orig"
 """
 - images
 - labels
 """
 
-RESULTS_DIR = "C:\\Users\\davet\\OneDrive\\Desktop\\fmad\\fmad_chd"
+RESULTS_DIR = "C:\\Users\\angel\\Desktop\\fmad\\fmad_chd"
 """
 - test
     - images
@@ -89,17 +90,21 @@ if __name__ == '__main__':
     shuffle(all_label_files)
     success_count = 0
     for label_path in all_label_files:
-        success, new_text = parse_annotations(label_path)
-        if success:
-            success_count += 1
-            if success_count <= TRAINING_IMAGES:
-                add_to_results_dir(label_path, new_text, "train")
-            elif success_count <= (TRAINING_IMAGES + TESTING_IMAGES):
-                add_to_results_dir(label_path, new_text, "test")
-            else:
-                add_to_results_dir(label_path, new_text, "val")
-        if success_count >= TOTAL_IMAGES:
-            break
+        image_path = label_path.replace("labels", "images").replace(".yml", ".png")
+        if exists(image_path):
+            success, new_text = parse_annotations(label_path)
+            if success:
+                success_count += 1
+                if success_count <= TRAINING_IMAGES:
+                    add_to_results_dir(label_path, new_text, "train")
+                elif success_count <= (TRAINING_IMAGES + TESTING_IMAGES):
+                    add_to_results_dir(label_path, new_text, "test")
+                else:
+                    add_to_results_dir(label_path, new_text, "val")
+            if success_count >= TOTAL_IMAGES:
+                break
+        else:
+            print(f"{image_path} doesn't exist, skipping")
 
 """
 python train.py --workers 8 --device 0 --batch-size 6 --data data/chd_fmad_2022.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights 'yolov7.pt' --name yolov7 --hyp data/hyp.scratch.p5.yaml --epochs 50 --rect
