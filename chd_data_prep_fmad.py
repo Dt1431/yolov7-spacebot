@@ -4,11 +4,11 @@ import os
 from glob import glob
 from random import shuffle
 
-TRAINING_IMAGES = 5000
-VAL_IMAGES = 500
+TRAINING_IMAGES = 2000
+VAL_IMAGES = 400
 
 # USED @ END to Check vs. "validation" while training
-TESTING_IMAGES = 1000
+TESTING_IMAGES = 400
 
 CLASS_NAMES = ['person', 'crutches', 'walking_frame', 'wheelchair', 'push_wheelchair']
 
@@ -70,20 +70,21 @@ def add_to_results_dir(labels_src, new_text, subdirectory):
     shutil.copyfile(image_src, image_dst)
 
 
-def clear_results_dir():
-    images = glob(f"{RESULTS_DIR}\\*\\images\\*.png")
+def clear_results_dir(clear_dir):
+    print(f"Deleting images, annotations and cache from results directory: {clear_dir}")
+    images = glob(f"{clear_dir}\\*\\images\\*.png")
     for image_path in images:
         os.remove(image_path)
-    labels = glob(f"{RESULTS_DIR}\\*\\labels\\*.txt")
+    labels = glob(f"{clear_dir}\\*\\labels\\*.txt")
     for label_path in labels:
         os.remove(label_path)
-    caches = glob(f"{RESULTS_DIR}\\*\\*.cache")
+    caches = glob(f"{clear_dir}\\*\\*.cache")
     for cache_path in caches:
         os.remove(cache_path)
 
 
 if __name__ == '__main__':
-    clear_results_dir()
+    clear_results_dir(RESULTS_DIR)
     all_label_files = glob(f"{DATA_DIR}\\labels\\*.yml")
     shuffle(all_label_files)
     success_count = 0
